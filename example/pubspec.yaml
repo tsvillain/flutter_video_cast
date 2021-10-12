@@ -11,6 +11,7 @@ dependencies:
 
   flutter_video_cast:
     path: ../
+  video_player: ^2.2.4
 
   cupertino_icons: ^0.1.3
 
