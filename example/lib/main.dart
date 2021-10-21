@@ -161,8 +161,8 @@ class _CastSampleState extends State<CastSample> {
     _controller = controller;
     try {
       await _controller.addSessionListener();
-      print(
-          "{{{}}} Connected: " + (await _controller.isConnected()).toString());
+      print("{{{}}} Connected: (on btn created) " +
+          (await _controller.isConnected()).toString());
     } catch (e) {
       print("err: ${e.toString()}");
     }
@@ -170,6 +170,8 @@ class _CastSampleState extends State<CastSample> {
 
   Future<void> _onSessionStarted() async {
     setState(() => _state = AppState.connected);
+    print("{{{}}} Connected: (onSessionStarted) " +
+        (await _controller.isConnected()).toString());
     try {
       await _controller.loadMedia(
           'https://player.vimeo.com/external/605412753.m3u8?s=b6e3a93a339e449ad7723e4458a54ddeebd309f9');
