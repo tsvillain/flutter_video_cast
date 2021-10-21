@@ -22,18 +22,18 @@ class CastSample extends StatefulWidget {
 
 class _CastSampleState extends State<CastSample> {
   ChromeCastController _controller;
-  VideoPlayerController _videoController;
+  // VideoPlayerController _videoController;
   AppState _state = AppState.idle;
   bool _playing = false;
-  static const String videoUrl =
-      'https://player.vimeo.com/external/605412753.m3u8?s=b6e3a93a339e449ad7723e4458a54ddeebd309f9';
+  // static const String videoUrl =
+  //     'https://player.vimeo.com/external/605412753.m3u8?s=b6e3a93a339e449ad7723e4458a54ddeebd309f9';
   @override
   void initState() {
-    _videoController = VideoPlayerController.network(videoUrl);
-    _videoController.initialize().then((value) {
-      setState(() {});
-      _videoController.play();
-    });
+    // _videoController = VideoPlayerController.network(videoUrl);
+    // _videoController.initialize().then((value) {
+    //   // setState(() {});
+    //   // _videoController.play();
+    // });
     super.initState();
   }
 
@@ -57,7 +57,7 @@ class _CastSampleState extends State<CastSample> {
             onSessionStarted: _onSessionStarted,
             onSessionEnded: () {
               setState(() => _state = AppState.idle);
-              _videoController.play();
+              // _videoController.play();
             },
             onRequestCompleted: _onRequestCompleted,
             onRequestFailed: _onRequestFailed,
@@ -68,15 +68,16 @@ class _CastSampleState extends State<CastSample> {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            width: double.maxFinite,
-            child: _videoController.value.isInitialized
-                ? AspectRatio(
-                    aspectRatio: _videoController.value.aspectRatio,
-                    child: VideoPlayer(_videoController),
-                  )
-                : Container(),
-          ),
+          // SizedBox(
+          //   width: double.maxFinite,
+          //   child: _videoController.value.isInitialized
+          //       ? AspectRatio(
+          //           aspectRatio: _videoController.value.aspectRatio,
+          //           child: VideoPlayer(_videoController),
+          //         )
+          //       : Container(),
+          // ),
+          Text("random text"),
           SizedBox(
             height: 10,
           ),
@@ -125,10 +126,11 @@ class _CastSampleState extends State<CastSample> {
         await _controller.isConnected() && await _controller.isPlaying();
     if (playing) {
       _controller.seek(relative: true, interval: 10.0);
-    } else {
-      final currentPosition = await _videoController.position;
-      _videoController.seekTo(currentPosition + Duration(seconds: 10));
     }
+    // else {
+    //   final currentPosition = await _videoController.position;
+    //   _videoController.seekTo(currentPosition + Duration(seconds: 10));
+    // }
     setState(() => _playing = !playing);
   }
 
@@ -137,10 +139,11 @@ class _CastSampleState extends State<CastSample> {
         await _controller.isConnected() && await _controller.isPlaying();
     if (playing) {
       _controller.seek(relative: true, interval: -10.0);
-    } else {
-      final currentPosition = await _videoController.position;
-      _videoController.seekTo(currentPosition - Duration(seconds: 10));
     }
+    // else {
+    //   final currentPosition = await _videoController.position;
+    //   _videoController.seekTo(currentPosition - Duration(seconds: 10));
+    // }
     setState(() => _playing = !playing);
   }
 
@@ -156,22 +159,40 @@ class _CastSampleState extends State<CastSample> {
 
   Future<void> _onButtonCreated(ChromeCastController controller) async {
     _controller = controller;
-    await _controller.addSessionListener();
+    try {
+      await _controller.addSessionListener();
+      print(
+          "{{{}}} Connected: " + (await _controller.isConnected()).toString());
+    } catch (e) {
+      print("err: ${e.toString()}");
+    }
   }
 
   Future<void> _onSessionStarted() async {
     setState(() => _state = AppState.connected);
+    try {
+      await _controller.loadMedia(
+          'https://player.vimeo.com/external/605412753.m3u8?s=b6e3a93a339e449ad7723e4458a54ddeebd309f9');
+      print("{{{}}} Media loaded");
+      try {
+        await _controller.play();
+        print("{{{}}} started playing");
+      } catch (e) {
+        print("{{{}}} Play Failed: ${e.toString()}");
+      }
+    } catch (e) {
+      print("{{{}}} Media load failed : ${e.toString()}");
+    }
 
-    await _controller.loadMedia(
-        'https://player.vimeo.com/external/605412753.m3u8?s=b6e3a93a339e449ad7723e4458a54ddeebd309f9');
-    final duration = await _videoController.position;
-    await Future.delayed(Duration(seconds: 5));
-    await _videoController.pause();
-    _controller.seek(interval: duration.inSeconds.toDouble(), relative: true);
+    // final duration = await _videoController.position;
+    // await Future.delayed(Duration(seconds: 5));
+    // await _videoController.pause();
+    // _controller.seek(interval: duration.inSeconds.toDouble(), relative: true);
   }
 
   Future<void> _onRequestCompleted() async {
     final playing = await _controller.isPlaying();
+    print("{{{}}} Playing : $playing");
     setState(() {
       _state = AppState.mediaLoaded;
       _playing = playing;
@@ -180,7 +201,7 @@ class _CastSampleState extends State<CastSample> {
 
   Future<void> _onRequestFailed(String error) async {
     setState(() => _state = AppState.error);
-    print(error);
+    print("{{{}}} Request Failed: ${error.toString()}");
   }
 }
 
